@@ -14,6 +14,7 @@ import { Fontisto } from "@expo/vector-icons";
 import { theme } from "./colors.js";
 
 const STORAGE_KEY = "@toDos";
+const WORKING_KEY = "@working";
 
 export default function App() {
   const [working, setWorking] = useState(true);
@@ -21,18 +22,32 @@ export default function App() {
   const [toDos, setToDos] = useState({});
 
   useEffect(() => {
+    loadCurrentTab();
     loadToDos();
   }, []);
 
-  const work = () => setWorking(true);
-  const travel = () => setWorking(false);
+  const work = async () => {
+    setWorking(true);
+    await saveCurrentTab(true);
+  };
+  const travel = async () => {
+    setWorking(false);
+    await saveCurrentTab(false);
+  };
   const onChangeText = (e) => setText(e);
+  const saveCurrentTab = async (currentTab) => {
+    await AsyncStorage.setItem(WORKING_KEY, JSON.stringify(currentTab));
+  };
+  const loadCurrentTab = async () => {
+    const currentTab = await AsyncStorage.getItem(WORKING_KEY);
+    currentTab !== null ? setWorking(JSON.parse(currentTab)) : null;
+  };
   const saveToDos = async (toSave) => {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
   };
   const loadToDos = async () => {
     const s = await AsyncStorage.getItem(STORAGE_KEY);
-    setToDos(JSON.parse(s));
+    s !== null ? setToDos(JSON.parse(s)) : null;
   };
 
   const addToDo = async () => {
