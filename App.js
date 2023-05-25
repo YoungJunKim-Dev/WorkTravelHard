@@ -55,7 +55,7 @@ export default function App() {
       return;
     }
     //const newToDos = Object.assign({}, toDos, {[Date.now()] : {text, work:working}})
-    const newToDo = { ...toDos, [Date.now()]: { text, working } };
+    const newToDo = { ...toDos, [Date.now()]: { text, working, done: false } };
     setToDos(newToDo);
     await saveToDos(newToDo);
     setText("");
@@ -76,6 +76,15 @@ export default function App() {
       },
     ]);
   };
+
+  //check if todo is done
+  const doneToDo = async (id) => {
+    const newToDos = { ...toDos };
+    newToDos[id].done = !newToDos[id].done;
+    setToDos(newToDos);
+    await saveToDos(newToDos);
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -124,7 +133,24 @@ export default function App() {
         {Object.keys(toDos).map((key, idx) => {
           return toDos[key].working === working ? (
             <View key={idx} style={styles.toDo}>
-              <Text style={styles.toDoText}>{toDos[key].text}</Text>
+              <TouchableOpacity onPress={() => doneToDo(key)}>
+                <Fontisto
+                  name={
+                    toDos[key].done ? "checkbox-active" : "checkbox-passive"
+                  }
+                  size={18}
+                  color={"white"}
+                />
+              </TouchableOpacity>
+              <Text
+                style={{
+                  ...styles.toDoText,
+                  textDecorationLine: toDos[key].done ? "line-through" : "none",
+                  color: toDos[key].done ? theme.toDoBg : "white",
+                }}
+              >
+                {toDos[key].text}
+              </Text>
               <TouchableOpacity onPress={() => deleteToDo(key)}>
                 <Fontisto name="trash" size={18} color={theme.toDoBg} />
               </TouchableOpacity>
@@ -173,7 +199,6 @@ const styles = StyleSheet.create({
   },
   toDoText: {
     fontSize: 16,
-    color: "white",
     fontWeight: 500,
   },
 });
